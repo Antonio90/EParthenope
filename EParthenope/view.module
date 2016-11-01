@@ -1,0 +1,140 @@
+<?php
+
+
+function view_menu() {
+	$items = array();
+    $items['inserz'] = array(
+        'page callback' => 'drupal_get_form',
+		'page arguments' => array('view_form'),
+		'access callback' => 'user_is_logged_in',
+    );
+	
+	return $items;
+}
+
+
+function view_form($form, $form_state){
+	$form = array();
+	$id_inserz=$_GET['id'];
+	$result=db_query("select * from {users join inserzioni on users.uid=inserzioni.cod_utente} where id_inserzione=$id_inserz ");
+	$foto=db_query("select * from {inserzioni i join file_managed f on  i.uri_image=f.fid } where id_inserzione=$id_inserz");
+	$uri=0;
+	foreach ($foto AS $foto){
+		$uri = $foto->uri;
+	}
+
+
+	//Parte per il submit-elimina
+	global $user;
+	$id_utente= $user->uid;
+	$visibile=TRUE;
+
+foreach($result AS $result){
+
+	if($id_utente != $result ->cod_utente){
+		$visibile=FALSE;
+	}
+
+	//FORM
+	drupal_set_title($result ->nome_inserzione);
+		
+	if($uri==null){
+		
+		$url=TRUE;
+		drupal_set_message ("Foto non presente nel nostro Database",'error');
+		
+	}else{
+		
+		$url=file_create_url($uri); //tramutazione da public: a url
+	}
+
+
+	$form['img'] = array(
+	  '#weight' => '0',
+	  '#type' => 'item',
+	  '#markup' => '<img src="'.$url.'"  width="260" height="300"></img>', //markup=puoi usare un tag html
+	);
+	$form['utente'] = array(
+	  '#weight' => '1',
+	  '#required' => '0',
+	  '#size' => '20',
+	  '#type' => 'textfield',
+	  '#default_value' => $result -> name,
+	  '#attributes' => array('readonly'=>'readonly'),
+	  '#title' => t('Utente'),
+	);
+	$form['email'] = array(
+	  '#weight' => '2',
+	  '#size' => '40',
+	  '#type' => 'textfield',
+	  '#default_value' => $result -> mail,
+	  '#attributes' => array('readonly'=>'readonly'),
+	  '#title'=> t('Email'),
+	  );
+	$form['prezzo'] = array(
+	  '#weight' => '3',
+	  '#required' => '0',
+	  '#size' => '20',
+	  '#type' => 'textfield',
+	  '#default_value' => $result -> prezzo_inserzione,
+	  '#attributes' => array('readonly'=>'readonly'),
+	  '#title' => t('Prezzo €'),
+	);
+	 
+	$form['città'] = array(
+	  '#weight' => '4',
+	  '#size' => '20',
+	  '#type' => 'textfield',
+	  '#default_value' => $result -> citta_inserzione,
+	  '#attributes' => array('readonly'=> 'readonly'),
+	  '#title' => t('Città'),
+	  );
+	$form['telefono'] = array(
+	  '#weight' => '5',
+	  '#size' => '20',
+	  '#type' => 'textfield',
+	  '#default_value' => $result -> telefono_inserzione,
+	  '#attributes' => array('readonly'=> 'readonly'),
+	  '#title' => t('Telefono'),
+	  );
+	$form['descrizione'] = array(
+	  '#weight' => '6',
+	  '#type' => 'textarea',
+	  '#default_value' => $result -> descrizione_inserzione,
+	  '#attributes' => array('readonly'=>'readonly'),
+	  '#title' => t('Descrizione'),
+	  );
+
+	  $form['elimina']=array(
+		
+		'#weight' =>'7',
+		'#type' => 'submit',
+		'#value' => t('Elimina'),
+		'#access' => $visibile,
+		'#submit' =>array('view_form_elimina_submit'),
+	);
+	  $form['indietro']=array(
+		
+		'#weight' =>'8',
+		'#type' => 'submit',
+		'#value' => t('Indietro'),
+		'#submit'=>array('view_form_indietro_submit'),
+	);
+	}
+	return $form;
+}
+
+function view_form_elimina_submit($form,&$form_state){
+	
+	$new_id=$_GET['id'];
+	$sql= db_delete('inserzioni')
+		->condition('id_inserzione',$new_id)
+		->execute();
+	$form_state['redirect']='annunci';
+	drupal_set_message("Inserzione cancellata con successo.");
+	
+}
+
+function view_form_indietro_submit($form,&$form_state){	
+	drupal_goto('annunci');
+}

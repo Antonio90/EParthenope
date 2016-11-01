@@ -1,0 +1,4 @@
+name="Inserimento Prodotti"
+description= "Modulo creato per l'iserimento dei  prodotti nella bacheca"
+core="7.x"
+files[] = insert.install

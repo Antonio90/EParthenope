@@ -1,0 +1,77 @@
+<?php
+function insert_schema(){
+$schema=array();
+
+$schema['inserzioni'] = array(
+  'description' => 'TODO: please describe this table!',
+  'fields' => array(
+    'id_inserzione' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'serial',
+      'not null' => TRUE,
+    ),
+    'nome_inserzione' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'varchar',
+      'length' => '250',
+      'not null' => TRUE,
+    ),
+    'tipo_inserzione' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'varchar',
+      'length' => '20',
+      'not null' => TRUE,
+    ),
+    'prezzo_inserzione' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'float',
+      'not null' => FALSE,
+      'default' => 0,
+      'precision' => '10',
+      'scale' => '2',
+    ),
+    'citta_inserzione' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'varchar',
+      'length' => '30',
+      'not null' => TRUE,
+    ),
+    'telefono_inserzione' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'varchar',
+      'length' => '20',
+      'not null' => FALSE,
+    ),
+    'descrizione_inserzione' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'varchar',
+      'length' => '500',
+      'not null' => TRUE,
+    ),
+    'data_inserzione' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'timestamp',
+      'not null' => TRUE,
+      'default' => 'CURRENT_TIMESTAMP',
+    ),
+    'uri_image' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'int',
+      'not null' => FALSE,
+      'default' => 0,
+    ),
+    'cod_utente' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+    ),
+  ),
+  'primary key' => array('id_inserzione'),
+  'indexes' => array(
+    'cod_utente' => array('cod_utente'),
+  ),
+);
+
+ return $schema;
+}

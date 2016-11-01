@@ -1,0 +1,26 @@
+####PROGETTO TECNOLOGIE WEB E-PARTHENOPE###
+
+Progetto ideato e realizzato da Alessia Calabrò e Antonio Riccardi per l'esame di Tecnologie Web.
+
+PREREQUISITI:
+
+	- Drupal installato su un web server --> http://www.drupal.it/ (Testato su drupal 7.x)
+
+COSA E':
+
+	- E-PARTHENOPE e' un modulo drupal per creare inserzioni online pensato per gli studenti universitari
+	
+PRIMA DELL'INSTALLAZIONE:
+
+	- Apri il file api.php e setta i dati del tuo database
+	
+INSTALLAZIONE:
+	
+	- Copia tutto il contenuto della cartella sotto ${drupalName}/sites/all/modules/${moduleName}
+	
+	
+ESEMPIO:
+
+	- https://students.uniparthenope.it/~0124000411/drupal-7.22/
+
+

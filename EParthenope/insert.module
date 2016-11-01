@@ -1,0 +1,237 @@
+<?php
+	/**
+	*@file
+	*Questo modulo serve per l'inserimento in bacheca di nuovi annunci.
+	*/
+function insert_help($path,$arg){
+	switch ($path) {
+		case "admin/help#insert":
+		  return '<p>' . t("Ti permetti di inserire nuovi Annunci!") . '</p>';
+		  break;
+  }
+} 
+
+//Funzione che mostra il link al form
+function insert_menu() {
+	$items = array();
+    $items['insert'] = array(
+        'title' => 'Aggiungi Inserzione',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('insert_form'),
+		'access callback' => TRUE,
+		'access callback' => 'user_is_logged_in',
+    );
+	$items['annunci'] = array(
+        'title' => 'Annunci',
+        'page callback' => 'visualizza_inserzioni',
+		'access callback' =>TRUE,
+    );
+	
+	
+    return $items;
+	
+}
+
+//Funzioni User: prendono il nome utente,l'email,e l'id. 
+function return_user() {
+
+	global $user;
+	$username = $user->name;
+	return $username;
+	
+}
+function return_user_mail() {
+
+	global $user;
+	$usern = $user->mail;
+	return $usern;
+	
+}
+function return_user_id() {
+
+	global $user;
+	$userid = $user->uid;
+	return $userid;
+	
+}
+
+
+//Funzione per il form
+function insert_form($form,&$form_state){
+
+
+
+$form['nome'] = array(
+  '#weight' => '0',
+  '#required' => '1',
+  '#type' => 'textfield',
+  '#default_value' => return_user(),
+  '#attributes' => array('readonly'=>'readonly'),
+  '#title' => t('Utente'),
+);
+
+
+$form['email'] = array(
+  '#weight' => '1',
+  '#required' => '1',
+  '#type' => 'textfield',
+  '#default_value' => return_user_mail(),
+  '#attributes' => array('readonly'=>'readonly'),
+  '#title' => t('Email'),
+);
+
+$form['nome_prod'] = array(
+  '#weight' => '3',
+  '#required' => '1',
+  '#type' => 'textfield',
+  '#title' => t('Titolo Inserzione'),
+);
+
+$form['radio'] = array(
+  '#required' => '1',
+  '#default_value' => 'vendita',
+  '#weight' => '4',
+  '#title' => t('Tipo'),
+  '#type' => 'radios',
+  '#options' => array(
+    'vendita' => t('Vendita'),
+    'prestito' => t('Prestito'),
+  ),
+ 
+);
+
+$form['prezzo'] = array(
+  '#weight' => '5',
+  '#type' => 'textfield',
+  '#title' => t('Prezzo'),
+);
+
+$form['citta'] = array(
+  '#weight' => '6',
+  '#required' => '1',
+  '#type' => 'textfield',
+  '#title' => t('Città'),
+);
+
+
+$form['telefono'] = array(
+  '#weight' => '7',
+  '#required' => '0',
+  '#type' => 'textfield',
+  '#title' => t('Telefono'),
+);
+
+$form['sample_textarea'] = array(
+  '#weight' => '8',
+  '#required' => '1',
+  '#description' => 'Inserisci qui una breve descrizione sul prodotto',
+  '#title' => t('Descrizione Prodotto'),
+  '#type' => 'textarea',
+);
+$form['img'] = array(
+  '#weight' => '9',
+  '#required' => '0',
+  '#description' => t('Inserisci una foto del prodotto. Un annuncio con foto viene consultato mediamente 7 volte di più.'),
+  '#type' => 'managed_file',
+  '#upload_location' => 'public://insert/foto/',
+  '#title' => t('Immagine Pincipale'),
+  '#progress_indicator' =>'bar',
+  '#upload_validators' => array(
+  'file_validate_extensions' => array('gif png jpg jpeg'),)
+);
+
+$form['submit']=array(
+	'#weight' => '10',
+    '#type'=>'submit',
+    '#value'=>'Conferma',
+);
+
+ 
+return $form;
+}
+
+//Funzione per il check dei campi
+function insert_form_validate($form, &$form_state) {
+ if(!is_numeric($form_state['values']['telefono'])){
+	form_set_error('telefono',t('Devi inserire un numero di telefono(senza caratteri)' ));
+	return FALSE;
+	}
+	
+if(!is_numeric($form_state['values']['prezzo'])){
+	form_set_error('prezzo',t('Devi inserire un prezzo di soli numeri(La valuta è €)' ));
+	return FALSE;
+	}
+return TRUE;	
+}
+
+
+//Funzione per il salvataggio dei dati nel DB
+function insert_form_submit($form,&$form_state){
+
+
+
+$sql=db_insert('inserzioni')
+	->fields(array(
+			'nome_inserzione' => $form_state['values']['nome_prod'],
+			'tipo_inserzione' => $form_state['values']['radio'],
+			'prezzo_inserzione' => $form_state['values']['prezzo'],
+			'citta_inserzione' => $form_state['values']['citta'],
+			'telefono_inserzione' => $form_state['values']['telefono'],
+			'descrizione_inserzione' => $form_state['values'] ['sample_textarea'],
+			'uri_image' => $form_state['values']['img'],
+			'cod_utente' => return_user_id(),
+			))
+			->execute();
+if($sql){ 
+	drupal_set_message(t('Annuncio inserito correttamente!'));
+	}			  
+
+
+
+}
+
+
+//Funzione per la visualizzazione dei record del db
+function visualizza_inserzioni(){
+$result=db_query("select * from {users join inserzioni on users.uid=inserzioni.cod_utente} order by data_inserzione desc");
+
+
+$header=array(t('Nome Inserzione'),t('Tipo'),t('Prezzo €'),t('Citta'),t('Telefono'),t('Descrizione'),t('Data'),t('Utente'),t('email'));
+$rows=array();
+
+foreach($result AS $result){
+	
+	$id=$result->id_inserzione;
+	$nome=$result->nome_inserzione;
+	$rows[]=array(
+		
+		 "<a title='$nome' href= ?q=inserz&id=$id />".$nome,
+		$result ->tipo_inserzione,
+		$result ->prezzo_inserzione,
+		$result ->citta_inserzione,
+		$result ->telefono_inserzione,
+		$result ->descrizione_inserzione,
+		$result ->data_inserzione,
+		
+		array('data'=>
+				array('#type'=>'link',
+					  '#title'=>t($result->name),
+					  '#href'=>'users/'.$result->name)),
+		
+		array('data'=>
+			array('#type'=>'link',
+				  '#title'=>t($result->mail),
+				  '#href'=>'mailto:'.$result->mail)),
+		
+		);
+	}
+	
+	
+	 return theme('table',array('header'=>$header,'rows'=>$rows));
+	
+	
+}
+
+
+
+	
